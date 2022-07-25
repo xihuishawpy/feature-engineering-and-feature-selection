@@ -21,7 +21,7 @@ def rf_importance(X_train,y_train,max_depth=10,class_weight=None,top_n=15,n_esti
     feat_labels = X_train.columns
     std = np.std([tree.feature_importances_ for tree in model.estimators_],
                  axis=0) #  inter-trees variability. 
-    print("Feature ranking:") 
+    print("Feature ranking:")
 #    l1,l2,l3,l4 = [],[],[],[]
     for f in range(X_train.shape[1]):
         print("%d. feature no:%d feature name:%s (%f)" % (f + 1, indices[f], feat_labels[indices[f]], importances[indices[f]]))
@@ -30,9 +30,9 @@ def rf_importance(X_train,y_train,max_depth=10,class_weight=None,top_n=15,n_esti
 #        l3.append(feat_labels[indices[f]])
 #        l4.append(importances[indices[f]])
     #feature_rank = pd.Dataframe(zip(l1,l2,l3,l4),columns=['id','indice','feature','importances'])
-    
+
     # plotting
-    indices = indices[0:top_n]
+    indices = indices[:top_n]
     plt.figure()
     plt.title("Feature importances top %d" % top_n)
     plt.bar(range(top_n), importances[indices],
@@ -40,7 +40,7 @@ def rf_importance(X_train,y_train,max_depth=10,class_weight=None,top_n=15,n_esti
     plt.xticks(range(top_n), indices)
     plt.xlim([-1,top_n])
     plt.show() 
-    
+
     return model
 
 
@@ -54,7 +54,7 @@ def gbt_importance(X_train,y_train,max_depth=10,top_n=15,n_estimators=50,random_
     feat_labels = X_train.columns
     std = np.std([tree[0].feature_importances_ for tree in model.estimators_],
                  axis=0) #  inter-trees variability. 
-    print("Feature ranking:")   
+    print("Feature ranking:")
 #    l1,l2,l3,l4 = [],[],[],[]
     for f in range(X_train.shape[1]):
         print("%d. feature no:%d feature name:%s (%f)" % (f + 1, indices[f], feat_labels[indices[f]], importances[indices[f]]))
@@ -64,7 +64,7 @@ def gbt_importance(X_train,y_train,max_depth=10,top_n=15,n_estimators=50,random_
 #        l4.append(importances[indices[f]])
 #    feature_rank = pd.Dataframe(zip(l1,l2,l3,l4),columns=['id','indice','feature','importances'])   
     # plotting
-    indices = indices[0:top_n]
+    indices = indices[:top_n]
     plt.figure()
     plt.title("Feature importances top %d" % top_n)
     plt.bar(range(top_n), importances[indices],
@@ -72,5 +72,5 @@ def gbt_importance(X_train,y_train,max_depth=10,top_n=15,n_estimators=50,random_
     plt.xticks(range(top_n), indices)
     plt.xlim([-1,top_n])
     plt.show() 
-    
+
     return model

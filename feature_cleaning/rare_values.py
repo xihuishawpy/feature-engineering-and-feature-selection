@@ -84,7 +84,6 @@ class GroupingRareValues():
         """
 
         X = X_in.copy(deep=True)
-
 #        if cols is None:
 #            cols = X.columns.values
 
@@ -93,7 +92,6 @@ class GroupingRareValues():
             for i in mapping:
                 column = i.get('col') # get the column name
                 X[column] = X[column].map(i['mapping'])
-
 #                try:
 #                    X[column] = X[column].astype(int)
 #                except ValueError as e:
@@ -216,7 +214,6 @@ class ModeImputation():
         """
 
         X = X_in.copy(deep=True)
-
 #        if cols is None:
 #            cols = X.columns.values
 
@@ -225,7 +222,6 @@ class ModeImputation():
             for i in mapping:
                 column = i.get('col') # get the column name
                 X[column] = X[column].map(i['mapping'])
-
 #                try:
 #                    X[column] = X[column].astype(int)
 #                except ValueError as e:
