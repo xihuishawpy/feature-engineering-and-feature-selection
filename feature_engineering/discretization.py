@@ -95,24 +95,18 @@ class ChiMerge():
 
         X = X_in.copy(deep=True)
 
-        if bins is not None:  # transform
-            try:
-                X[col+'_chimerge'] = pd.cut(X[col],bins=bins,include_lowest=True)
-            except Exception as e:
-                print(e)
-       
-        else: # fit
-            try:               
+        try:           
+            if bins is None:
                 # create an array which save the num of 0/1 samples of the column to be chimerge
                 total_num = X.groupby([col])[y].count()
-                total_num = pd.DataFrame({'total_num': total_num}) 
+                total_num = pd.DataFrame({'total_num': total_num})
                 positive_class = X.groupby([col])[y].sum()
-                positive_class = pd.DataFrame({'positive_class': positive_class}) 
-                regroup = pd.merge(total_num, positive_class, left_index=True, right_index=True,how='inner')  
+                positive_class = pd.DataFrame({'positive_class': positive_class})
+                regroup = pd.merge(total_num, positive_class, left_index=True, right_index=True,how='inner')
                 regroup.reset_index(inplace=True)
-                regroup['negative_class'] = regroup['total_num'] - regroup['positive_class']  
+                regroup['negative_class'] = regroup['total_num'] - regroup['positive_class']
                 regroup = regroup.drop('total_num', axis=1)
-                np_regroup = np.array(regroup)  
+                np_regroup = np.array(regroup)
                 # merge interval that have 0 pos/neg samples
                 i = 0
                 while (i <= np_regroup.shape[0] - 2):
@@ -121,8 +115,8 @@ class ChiMerge():
                         np_regroup[i, 2] = np_regroup[i, 2] + np_regroup[i + 1, 2]  # neg
                         np_regroup[i, 0] = np_regroup[i + 1, 0]
                         np_regroup = np.delete(np_regroup, i + 1, 0)
-                        i = i - 1
-                    i = i + 1
+                        i -= 1
+                    i += 1
                 # calculate chi for neighboring intervals
                 # ∑[(yA-yB)²/yB]
                 chi_table = np.array([])
@@ -133,21 +127,24 @@ class ChiMerge():
                       np_regroup[i, 1] + np_regroup[i + 1, 1]) * (np_regroup[i, 2] + np_regroup[i + 1, 2]))
                     chi_table = np.append(chi_table, chi)
                 # merge intervals that have closing chi
-                while (1):
-                    if (len(chi_table) <= (num_of_bins - 1) and min(chi_table) >= confidenceVal):
-                        break
-                    chi_min_index = np.argwhere(chi_table == min(chi_table))[0]  
+                while 1 and not (
+                    (
+                        len(chi_table) <= (num_of_bins - 1)
+                        and min(chi_table) >= confidenceVal
+                    )
+                ):
+                    chi_min_index = np.argwhere(chi_table == min(chi_table))[0]
                     np_regroup[chi_min_index, 1] = np_regroup[chi_min_index, 1] + np_regroup[chi_min_index + 1, 1]
                     np_regroup[chi_min_index, 2] = np_regroup[chi_min_index, 2] + np_regroup[chi_min_index + 1, 2]
                     np_regroup[chi_min_index, 0] = np_regroup[chi_min_index + 1, 0]
                     np_regroup = np.delete(np_regroup, chi_min_index + 1, 0)
-        
+
                     if (chi_min_index == np_regroup.shape[0] - 1): 
                         chi_table[chi_min_index - 1] = (np_regroup[chi_min_index - 1, 1] * np_regroup[chi_min_index, 2] - np_regroup[chi_min_index - 1, 2] * np_regroup[chi_min_index, 1]) ** 2 \
                                                        * (np_regroup[chi_min_index - 1, 1] + np_regroup[chi_min_index - 1, 2] + np_regroup[chi_min_index, 1] + np_regroup[chi_min_index, 2]) / \
                                                    ((np_regroup[chi_min_index - 1, 1] + np_regroup[chi_min_index - 1, 2]) * (np_regroup[chi_min_index, 1] + np_regroup[chi_min_index, 2]) * (np_regroup[chi_min_index - 1, 1] + np_regroup[chi_min_index, 1]) * (np_regroup[chi_min_index - 1, 2] + np_regroup[chi_min_index, 2]))
                         chi_table = np.delete(chi_table, chi_min_index, axis=0)
-        
+
                     else:
                         chi_table[chi_min_index - 1] = (np_regroup[chi_min_index - 1, 1] * np_regroup[chi_min_index, 2] - np_regroup[chi_min_index - 1, 2] * np_regroup[chi_min_index, 1]) ** 2 \
                                                    * (np_regroup[chi_min_index - 1, 1] + np_regroup[chi_min_index - 1, 2] + np_regroup[chi_min_index, 1] + np_regroup[chi_min_index, 2]) / \
@@ -166,29 +163,31 @@ class ChiMerge():
                         #x = np_regroup[i, 0]
                         #list_temp.append(x)
                     elif i == np_regroup.shape[0] - 1:
-                        y = str(np_regroup[i - 1, 0]) + '+'
-                        #x = 100000000.
-                        #list_temp.append(x)
+                        y = f'{str(np_regroup[i - 1, 0])}+'
+                                        #x = 100000000.
+                                        #list_temp.append(x)
                     else:
-                        y = str(np_regroup[i - 1, 0]) + ',' + str(np_regroup[i, 0])
-                        #x = np_regroup[i, 0]
-                        #list_temp.append(x)
+                        y = f'{str(np_regroup[i - 1, 0])},{str(np_regroup[i, 0])}'
+                                        #x = np_regroup[i, 0]
+                                        #list_temp.append(x)
                     bins.append(np_regroup[i - 1, 0])
                     tmp.append(y)
-                
+
                 #list_temp.append(df[variable].max()+0.1)
                 bins.append(X[col].min()-0.1)
-                
-                result_data['interval'] = tmp  
-                result_data['flag_0'] = np_regroup[:, 2] 
-                result_data['flag_1'] = np_regroup[:, 1]  
+
+                result_data['interval'] = tmp
+                result_data['flag_0'] = np_regroup[:, 2]
+                result_data['flag_1'] = np_regroup[:, 1]
                 bins.sort(reverse=False)
-                print('Interval for variable %s' % col)
+                print(f'Interval for variable {col}')
                 print(result_data)
-                
-            except Exception as e:
-                print(e)
-        
+
+            else:
+                X[col+'_chimerge'] = pd.cut(X[col],bins=bins,include_lowest=True)
+        except Exception as e:
+            print(e)
+
         return X, bins
         
         
@@ -289,40 +288,30 @@ class DiscretizeByDecisionTree():
         if tree_model is not None:  # transform
             X[col+'_tree_discret'] = tree_model.predict_proba(X[col].to_frame())[:,1]
 
-        else: # fit
-            if isinstance(max_depth,int):
-                tree_model = DecisionTreeClassifier(max_depth=max_depth)
-                tree_model.fit(X[col].to_frame(), y)
-                # X[col+'_tree_discret'] = tree_model.predict_proba(X[col].to_frame())[:,1]
-                #print(x.tree_discret.unique())
-#                bins = pd.concat( [X.groupby([col+'_tree_discret'])[col].min(),
-#                                  X.groupby([col+'_tree_discret'])[col].max()], axis=1)
-#                print('bins:')            
-#                print(bins)
-            
-            elif len(max_depth)>1:
-                score_ls = [] # here I will store the roc auc
-                score_std_ls = [] # here I will store the standard deviation of the roc_auc
-                for tree_depth in max_depth:
-                    tree_model = DecisionTreeClassifier(max_depth=tree_depth)
-                    scores = cross_val_score(tree_model, X[col].to_frame(), y, cv=3, scoring='roc_auc')
-                    score_ls.append(np.mean(scores))
-                    score_std_ls.append(np.std(scores))
-                temp = pd.concat([pd.Series(max_depth), pd.Series(score_ls), pd.Series(score_std_ls)], axis=1)
-                temp.columns = ['depth', 'roc_auc_mean', 'roc_auc_std']
-                print('result ROC-AUC for each depth')
-                print(temp)
-                max_roc = temp.roc_auc_mean.max()
-                optimal_depth=temp[temp.roc_auc_mean==max_roc]['depth'].values
-                print('optimal_depth:',optimal_depth)
-                tree_model = DecisionTreeClassifier(max_depth=optimal_depth)
-                tree_model.fit(X[col].to_frame(), y)
-#                bins = pd.concat( [X.groupby([col+'_tree_discret'])[col].min(),
-#                                  X.groupby([col+'_tree_discret'])[col].max()], axis=1)
-#                print('bins:')            
-#                print(bins)
-            else:
-                raise ValueError('max_depth of a tree must be an integer or a list')
+        elif isinstance(max_depth,int):
+            tree_model = DecisionTreeClassifier(max_depth=max_depth)
+            tree_model.fit(X[col].to_frame(), y)
+            # X[col+'_tree_discret'] = tree_model.predict_proba(X[col].to_frame())[:,1]
+            #print(x.tree_discret.unique())
+        elif len(max_depth)>1:
+            score_ls = [] # here I will store the roc auc
+            score_std_ls = [] # here I will store the standard deviation of the roc_auc
+            for tree_depth in max_depth:
+                tree_model = DecisionTreeClassifier(max_depth=tree_depth)
+                scores = cross_val_score(tree_model, X[col].to_frame(), y, cv=3, scoring='roc_auc')
+                score_ls.append(np.mean(scores))
+                score_std_ls.append(np.std(scores))
+            temp = pd.concat([pd.Series(max_depth), pd.Series(score_ls), pd.Series(score_std_ls)], axis=1)
+            temp.columns = ['depth', 'roc_auc_mean', 'roc_auc_std']
+            print('result ROC-AUC for each depth')
+            print(temp)
+            max_roc = temp.roc_auc_mean.max()
+            optimal_depth=temp[temp.roc_auc_mean==max_roc]['depth'].values
+            print('optimal_depth:',optimal_depth)
+            tree_model = DecisionTreeClassifier(max_depth=optimal_depth)
+            tree_model.fit(X[col].to_frame(), y)
+        else:
+            raise ValueError('max_depth of a tree must be an integer or a list')
 
         return X, tree_model
 

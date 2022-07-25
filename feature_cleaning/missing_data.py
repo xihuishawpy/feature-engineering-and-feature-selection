@@ -49,8 +49,8 @@ def add_var_denote_NA(data,NA_col=[]):
         if data_copy[i].isnull().sum()>0:
             data_copy[i+'_is_NA'] = np.where(data_copy[i].isnull(),1,0)
         else:
-            warn("Column %s has no missing cases" % i)
-            
+            warn(f"Column {i} has no missing cases")
+
     return data_copy
 
 
@@ -64,7 +64,7 @@ def impute_NA_with_arbitrary(data,impute_value,NA_col=[]):
         if data_copy[i].isnull().sum()>0:
             data_copy[i+'_'+str(impute_value)] = data_copy[i].fillna(impute_value)
         else:
-            warn("Column %s has no missing cases" % i)
+            warn(f"Column {i} has no missing cases")
     return data_copy
 
 
@@ -84,7 +84,7 @@ def impute_NA_with_avg(data,strategy='mean',NA_col=[]):
             elif strategy=='mode':
                 data_copy[i+'_impute_mode'] = data_copy[i].fillna(data[i].mode()[0])
         else:
-            warn("Column %s has no missing" % i)
+            warn(f"Column {i} has no missing")
     return data_copy            
 
 
@@ -99,7 +99,7 @@ def impute_NA_with_end_of_distribution(data,NA_col=[]):
         if data_copy[i].isnull().sum()>0:
             data_copy[i+'_impute_end_of_distri'] = data_copy[i].fillna(data[i].mean()+3*data[i].std())
         else:
-            warn("Column %s has no missing" % i)
+            warn(f"Column {i} has no missing")
     return data_copy            
     
 
@@ -115,8 +115,8 @@ def impute_NA_with_random(data,NA_col=[],random_state=0):
             # extract the random sample to fill the na
             random_sample = data_copy[i].dropna().sample(data_copy[i].isnull().sum(), random_state=random_state)
             random_sample.index = data_copy[data_copy[i].isnull()].index
-            data_copy.loc[data_copy[i].isnull(), str(i)+'_random'] = random_sample
+            data_copy.loc[data_copy[i].isnull(), f'{str(i)}_random'] = random_sample
         else:
-            warn("Column %s has no missing" % i)
+            warn(f"Column {i} has no missing")
     return data_copy 
     

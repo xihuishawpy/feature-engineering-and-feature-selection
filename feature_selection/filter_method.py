@@ -44,7 +44,7 @@ def corr_feature_detect(data,threshold=0.8):
     -------
     pairs of correlated variables
     """
-    
+
     corrmat = data.corr()
     corrmat = corrmat.abs().unstack() # absolute value of corr coef
     corrmat = corrmat.sort_values(ascending=False)
@@ -52,18 +52,18 @@ def corr_feature_detect(data,threshold=0.8):
     corrmat = corrmat[corrmat < 1] # remove the digonal
     corrmat = pd.DataFrame(corrmat).reset_index()
     corrmat.columns = ['feature1', 'feature2', 'corr']
-   
+
     grouped_feature_ls = []
     correlated_groups = []
-    
+
     for feature in corrmat.feature1.unique():
         if feature not in grouped_feature_ls:
-    
+
             # find all features correlated to a single feature
             correlated_block = corrmat[corrmat.feature1 == feature]
             grouped_feature_ls = grouped_feature_ls + list(
                 correlated_block.feature2.unique()) + [feature]
-    
+
             # append the block of features to the list
             correlated_groups.append(correlated_block)
     return correlated_groups
@@ -110,7 +110,7 @@ def chi_square_test(X,y,select_k=10):
     
 
 def univariate_roc_auc(X_train,y_train,X_test,y_test,threshold):
-   
+
     """
     First, it builds one decision tree per feature, to predict the target
     Second, it makes predictions using the decision tree and the mentioned feature
@@ -127,13 +127,16 @@ def univariate_roc_auc(X_train,y_train,X_test,y_test,threshold):
     roc_values = pd.Series(roc_values)
     roc_values.index = X_train.columns
     print(roc_values.sort_values(ascending=False))
-    print(len(roc_values[roc_values > threshold]),'out of the %s featues are kept'% len(X_train.columns))
-    keep_col = roc_values[roc_values > threshold]
-    return keep_col
+    print(
+        len(roc_values[roc_values > threshold]),
+        f'out of the {len(X_train.columns)} featues are kept',
+    )
+
+    return roc_values[roc_values > threshold]
         
         
 def univariate_mse(X_train,y_train,X_test,y_test,threshold):
-   
+
     """
     First, it builds one decision tree per feature, to predict the target
     Second, it makes predictions using the decision tree and the mentioned feature
@@ -150,7 +153,10 @@ def univariate_mse(X_train,y_train,X_test,y_test,threshold):
     mse_values = pd.Series(mse_values)
     mse_values.index = X_train.columns
     print(mse_values.sort_values(ascending=False))
-    print(len(mse_values[mse_values > threshold]),'out of the %s featues are kept'% len(X_train.columns))
-    keep_col = mse_values[mse_values > threshold]
-    return keep_col        
+    print(
+        len(mse_values[mse_values > threshold]),
+        f'out of the {len(X_train.columns)} featues are kept',
+    )
+
+    return mse_values[mse_values > threshold]        
         

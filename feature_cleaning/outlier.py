@@ -118,8 +118,7 @@ def drop_outlier(data,outlier_index):
     drop the cases that are outliers
     """
     
-    data_copy = data[~outlier_index]
-    return data_copy
+    return data[~outlier_index]
 
 
 def impute_outlier_with_avg(data,col,outlier_index,strategy='mean'):

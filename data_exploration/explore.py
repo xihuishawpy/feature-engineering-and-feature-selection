@@ -26,8 +26,6 @@ def get_dtypes(data,drop_col=[]):
     name_of_col = list(data.columns)
     num_var_list = []
     str_var_list = []
-    all_var_list = []
-
     str_var_list = name_of_col.copy()
     for var in name_of_col:
         # check if column belongs to numeric type
@@ -42,7 +40,7 @@ def get_dtypes(data,drop_col=[]):
         if var in num_var_list:
             num_var_list.remove(var)
 
-    all_var_list.extend(str_var_list)
+    all_var_list = list(str_var_list)
     all_var_list.extend(num_var_list)
     return str_var_list, num_var_list, all_var_list
 
@@ -57,7 +55,7 @@ def describe(data,output_path=None):
     if output_path is not None:
         output = os.path.join(output_path,'describe.csv')
         result.to_csv(output)
-        print('result saved at:', str(output))
+        print('result saved at:', output)
     return result
     
     
@@ -77,9 +75,9 @@ def discrete_var_barplot(x,y,data,output_path=None):
     plt.figure(figsize=(15,10))
     sns.barplot(x=x,y=y,data=data)
     if output_path is not None:
-        output = os.path.join(output_path,'Barplot_'+str(x)+'_'+str(y)+'.png')
-        plt.savefig(output)   
-        print('Image saved at', str(output))
+        output = os.path.join(output_path, f'Barplot_{str(x)}_{str(y)}.png')
+        plt.savefig(output)
+        print('Image saved at', output)
     
     
 def discrete_var_countplot(x,data,output_path=None):
@@ -97,9 +95,9 @@ def discrete_var_countplot(x,data,output_path=None):
     plt.figure(figsize=(15,10))
     sns.countplot(x=x,data=data)
     if output_path is not None:
-        output = os.path.join(output_path,'Countplot_'+str(x)+'.png')
-        plt.savefig(output) 
-        print('Image saved at',str(output))
+        output = os.path.join(output_path, f'Countplot_{str(x)}.png')
+        plt.savefig(output)
+        print('Image saved at', output)
 
 
 def discrete_var_boxplot(x,y,data,output_path=None):
@@ -117,9 +115,9 @@ def discrete_var_boxplot(x,y,data,output_path=None):
     plt.figure(figsize=(15,10))
     sns.boxplot(x=x,y=y,data=data)
     if output_path is not None:
-        output = os.path.join(output_path,'Boxplot_'+str(x)+'_'+str(y)+'.png')
-        plt.savefig(output) 
-        print('Image saved at',str(output))
+        output = os.path.join(output_path, f'Boxplot_{str(x)}_{str(y)}.png')
+        plt.savefig(output)
+        print('Image saved at', output)
 
 
 def continuous_var_distplot(x,output_path=None,bins=None):
@@ -137,9 +135,9 @@ def continuous_var_distplot(x,output_path=None,bins=None):
     plt.figure(figsize=(15,10))
     sns.distplot(a=x,kde=False,bins=bins)
     if output_path is not None:
-        output=os.path.join(output_path,'Distplot_'+str(x.name)+'.png')
+        output = os.path.join(output_path, f'Distplot_{str(x.name)}.png')
         plt.savefig(output)
-        print('Image saved at',str(output))    
+        print('Image saved at', output)    
     
     
 # 2018.11.28 Created by Eamon.Zhang 
@@ -159,9 +157,12 @@ def scatter_plot(x,y,data,output_path=None):
     plt.figure(figsize=(15,10))
     sns.scatterplot(x=x,y=y,data=data)
     if output_path is not None:
-        output = os.path.join(output_path,'Scatter_plot_'+str(x.name)+'_'+str(y.name)+'.png')
+        output = os.path.join(
+            output_path, f'Scatter_plot_{str(x.name)}_{str(y.name)}.png'
+        )
+
         plt.savefig(output)
-        print('Image saved at',str(output))       
+        print('Image saved at', output)       
         
     
 def correlation_plot(data,output_path=None):
@@ -183,7 +184,7 @@ def correlation_plot(data,output_path=None):
     if output_path is not None:
         output = os.path.join(output_path,'Corr_plot'+'.png')
         plt.savefig(output)
-        print('Image saved at',str(output))  
+        print('Image saved at', output)  
     
     
 def heatmap(data,output_path=None,fmt='d'):
@@ -204,4 +205,4 @@ def heatmap(data,output_path=None,fmt='d'):
     if output_path is not None:
         output = os.path.join(output_path,'Heatmap'+'.png')
         plt.savefig(output)
-        print('Image saved at',str(output)) 
+        print('Image saved at', output) 
